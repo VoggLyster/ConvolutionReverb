@@ -1,6 +1,5 @@
 classdef FreqConv < audioPlugin
     properties
-        IR_resample_percentage = 100;
         mix = 50;
         max_frames = 150;
     end
@@ -20,12 +19,10 @@ classdef FreqConv < audioPlugin
     end
     properties (Constant)
         PluginInterface = audioPluginInterface( ...
-            audioPluginParameter("IR_resample_percentage", ...
-            "Mapping",{"lin",20,200}),...
             audioPluginParameter("mix",...
             "Mapping",{"lin",0,100}),...
             audioPluginParameter("max_frames",...
-            "Mapping",{"lin",10,1000}));
+            "Mapping",{"lin",10,500}));
     end    
     methods
         function plugin = FreqConv
@@ -35,6 +32,8 @@ classdef FreqConv < audioPlugin
            setup(plugin.output_buffer,[1,1]);
            plugin.delay_buffer = zeros(plugin.delay_buffer_size, plugin.channels);
            plugin.overlap_buffer = zeros(plugin.buffer_size, plugin.channels);
+           plugin.IR_frames_left = [];
+           plugin.IR_frames_right = [];
         end
         function out = process(p, in)
            write(p.input_buffer, in);
@@ -61,8 +60,10 @@ classdef FreqConv < audioPlugin
                n_frames = min(p.n_IR_frames, p.max_frames);
                for frame = 1:n_frames
                       x = p.delay_buffer(r:r+p.buffer_size-1,:);
-                      res_left = FreqConvolute(x(:,1), p.IR_frames_left(1+(frame-1)*p.NFFT:frame*p.NFFT,1));
-                      res_right = FreqConvolute(x(:,2), p.IR_frames_right(1+(frame-1)*p.NFFT:frame*p.NFFT,1));
+                      IR_frame_real = real(p.IR_frames_left(1+(frame-1)*p.NFFT:frame*p.NFFT,1));
+                      IR_frame_imag = imag(p.IR_frames_left(1+(frame-1)*p.NFFT:frame*p.NFFT,1));
+                      res_left = FreqConvolute(x(:,1), size(x(:,1),1), IR_frame_real, IR_frame_imag, p.NFFT);
+                      res_right = FreqConvolute(x(:,2), size(x(:,2),1), IR_frame_real, IR_frame_imag, p.NFFT);
                       rev(:,1) = rev(:,1) + res_left(1:p.buffer_size) / n_frames * p.mix/100;
                       rev(:,2) = rev(:,2) + res_right(1:p.buffer_size) / n_frames * p.mix/100;
                       overlap(:,1) = overlap(:,1) + res_left(p.buffer_size+1:p.buffer_size*2) / n_frames;
@@ -84,30 +85,21 @@ classdef FreqConv < audioPlugin
         end
         
         function reset(p)
+            max_IR_size = 2^20;
             IR_mat = coder.load("IR.mat"); 
             h = IR_mat.h_new;
-            threshold = -60;
-            threshold_mag = db2mag(threshold);
-            IR = [];
-            for i = numel(h):-1:1
-               if abs(h(i)) > threshold_mag
-                  IR = h(1:i);
-                  break 
-               end
-            end
+            threshold_idx = RemoveTailBelowThreshold(h, numel(h), -60);
+            IR = [h(1:threshold_idx); zeros(max_IR_size - threshold_idx,1)];
             p.NFFT = 2^nextpow2(p.buffer_size + 1);
             p.write_head = 1;
-            if(p.IR_resample_percentage ~= 1)
-                IR = resample(IR,round(p.IR_resample_percentage),100);
-            end
-            [p.IR_frames_left, p.IR_frames_right, p.n_IR_frames] = GetUnisonPartitionedIRFrames(IR, p.NFFT, p.buffer_size);
+            IR_frames_real = zeros(max_IR_size,1);
+            IR_frames_imag = zeros(max_IR_size,1);
+            [IR_frames_real, IR_frames_imag, ~] = GetUnisonPartitionedIRFrames(IR, threshold_idx, p.NFFT, p.buffer_size, IR_frames_real, IR_frames_imag);
+            p.IR_frames_left = complex(IR_frames_real, IR_frames_imag);
+            [IR_frames_real, IR_frames_imag, p.n_IR_frames] = GetUnisonPartitionedIRFrames(IR, threshold_idx, p.NFFT, p.buffer_size, IR_frames_real, IR_frames_imag);
+            p.IR_frames_right = complex(IR_frames_real, IR_frames_imag);
             p.delay_buffer = zeros(p.delay_buffer_size, p.channels);
             p.overlap_buffer = zeros(p.buffer_size, p.channels);
-        end
-        
-        function set.IR_resample_percentage(p, val)
-            p.IR_resample_percentage = val;
-            p.reset();
         end
     end
 end

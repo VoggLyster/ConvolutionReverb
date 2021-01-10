@@ -1,0 +1,12 @@
+max_IR_size = 2^20;
+buffer_size = 512;
+IR_mat = coder.load("IR.mat"); 
+h = IR_mat.h_new;
+threshold_idx = RemoveTailBelowThreshold(h, numel(h), -60);
+IR = [h(1:threshold_idx); zeros(max_IR_size - threshold_idx,1)];
+frame_size = 2^nextpow2(buffer_size + 1);
+IR_frames_real = zeros(max_IR_size,1);
+IR_frames_imag = zeros(max_IR_size,1);
+[IR_frames_real, IR_frames_imag, n_IR_frames] = GetUnisonPartitionedIRFrames(IR, threshold_idx, frame_size, buffer_size, IR_frames_real, IR_frames_imag);
+x = rand(buffer_size,1);
+FreqConvolute(x,buffer_size,IR_frames_real(1:frame_size), IR_frames_imag(1:frame_size), frame_size);
