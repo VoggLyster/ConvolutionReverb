@@ -14,20 +14,44 @@
 //==============================================================================
 /**
 */
-class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor
+class ConvolutionReverbAudioProcessorEditor  : public juce::AudioProcessorEditor, public Button::Listener
 {
 public:
-    NewProjectAudioProcessorEditor (NewProjectAudioProcessor&);
-    ~NewProjectAudioProcessorEditor() override;
+    ConvolutionReverbAudioProcessorEditor (ConvolutionReverbAudioProcessor&, AudioProcessorValueTreeState&);
+    ~ConvolutionReverbAudioProcessorEditor() override;
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
 
 private:
+    AudioProcessorValueTreeState& valueTreeState;
+
+    AudioFormatManager formatManager;
+    std::unique_ptr<AudioFormatReaderSource> readerSource;
+
+    int labelHeight = 20;
+    int sliderHeight = 30;
+
+    Label mixLabel;
+    Slider mixSlider;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> mixAttachment;
+
+    Label maxFramesLabel;
+    Slider maxFramesSlider;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> maxFramesAttachment;
+
+    Label IRNameLabel; 
+    TextButton loadIRButton;
+
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    NewProjectAudioProcessor& audioProcessor;
+    ConvolutionReverbAudioProcessor& audioProcessor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
+    AudioBuffer<float> IRFileAudioBuffer;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConvolutionReverbAudioProcessorEditor)
+
+        // Inherited via Listener
+        virtual void buttonClicked(Button*) override;
 };

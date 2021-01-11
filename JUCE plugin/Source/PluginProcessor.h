@@ -15,12 +15,12 @@
 //==============================================================================
 /**
 */
-class NewProjectAudioProcessor  : public juce::AudioProcessor
+class ConvolutionReverbAudioProcessor  : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    NewProjectAudioProcessor();
-    ~NewProjectAudioProcessor() override;
+    ConvolutionReverbAudioProcessor();
+    ~ConvolutionReverbAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -55,10 +55,19 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    //==================
+    void IRFileReady(AudioBuffer<float>* IRFileAudioBuffer);
+    void PrepareIRFromBuffers();
+
+    // Inherited via Listener
+    //void parameterChanged(const String& parameterID, float newValue) override;
+
 private:
     // Exposed params
-    float mix = 50;
-    int maxFrames = 1;
+    AudioProcessorValueTreeState parameters;
+
+    std::atomic<float>* mixParameter = nullptr;
+    std::atomic<float>* maxFramesParameter = nullptr;
 
     // Internal stuff
     int maxBufferSize = 1048576;
@@ -82,8 +91,9 @@ private:
     double outputSize = 0;
     int writeHead = 0;
     int fftWindowSize = 1024;
+    int blockSize = 0;
     bool IRLoaded = false;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConvolutionReverbAudioProcessor)
 };
