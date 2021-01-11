@@ -62,8 +62,8 @@ classdef FreqConv < audioPlugin
                       x = p.delay_buffer(r:r+p.buffer_size-1,:);
                       IR_frame_real = real(p.IR_frames_left(1+(frame-1)*p.NFFT:frame*p.NFFT,1));
                       IR_frame_imag = imag(p.IR_frames_left(1+(frame-1)*p.NFFT:frame*p.NFFT,1));
-                      res_left = FreqConvolute(x(:,1), size(x(:,1),1), IR_frame_real, IR_frame_imag, p.NFFT);
-                      res_right = FreqConvolute(x(:,2), size(x(:,2),1), IR_frame_real, IR_frame_imag, p.NFFT);
+                      res_left = FreqConvolute(x(:,1), IR_frame_real, IR_frame_imag, p.NFFT);
+                      res_right = FreqConvolute(x(:,2), IR_frame_real, IR_frame_imag, p.NFFT);
                       rev(:,1) = rev(:,1) + res_left(1:p.buffer_size) / n_frames * p.mix/100;
                       rev(:,2) = rev(:,2) + res_right(1:p.buffer_size) / n_frames * p.mix/100;
                       overlap(:,1) = overlap(:,1) + res_left(p.buffer_size+1:p.buffer_size*2) / n_frames;
@@ -85,18 +85,14 @@ classdef FreqConv < audioPlugin
         end
         
         function reset(p)
-            max_IR_size = 2^20;
             IR_mat = coder.load("IR.mat"); 
             h = IR_mat.h_new;
-            threshold_idx = RemoveTailBelowThreshold(h, numel(h), -60);
-            IR = [h(1:threshold_idx); zeros(max_IR_size - threshold_idx,1)];
+            IR = RemoveTailBelowThreshold(h, -60);
             p.NFFT = 2^nextpow2(p.buffer_size + 1);
             p.write_head = 1;
-            IR_frames_real = zeros(max_IR_size,1);
-            IR_frames_imag = zeros(max_IR_size,1);
-            [IR_frames_real, IR_frames_imag, ~] = GetUnisonPartitionedIRFrames(IR, threshold_idx, p.NFFT, p.buffer_size, IR_frames_real, IR_frames_imag);
+            [IR_frames_real, IR_frames_imag, ~] = GetUnisonPartitionedIRFrames(IR, p.NFFT, p.buffer_size);
             p.IR_frames_left = complex(IR_frames_real, IR_frames_imag);
-            [IR_frames_real, IR_frames_imag, p.n_IR_frames] = GetUnisonPartitionedIRFrames(IR, threshold_idx, p.NFFT, p.buffer_size, IR_frames_real, IR_frames_imag);
+            [IR_frames_real, IR_frames_imag, p.n_IR_frames] = GetUnisonPartitionedIRFrames(IR, p.NFFT, p.buffer_size);
             p.IR_frames_right = complex(IR_frames_real, IR_frames_imag);
             p.delay_buffer = zeros(p.delay_buffer_size, p.channels);
             p.overlap_buffer = zeros(p.buffer_size, p.channels);

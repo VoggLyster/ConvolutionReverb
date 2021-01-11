@@ -1,4 +1,5 @@
-function [ir_frames_real, ir_frames_imag, n_frames, output_size] = GetUnisonPartitionedIRFrames(IR, IR_size, frame_size, buffer_size, ir_frames_real, ir_frames_imag)
+function [ir_frames_real, ir_frames_imag, n_frames, output_size] = GetUnisonPartitionedIRFrames(IR, frame_size, buffer_size)
+    IR_size = numel(IR);
     n_frames = ceil(IR_size/buffer_size);
     IR_frames = zeros(buffer_size, n_frames);
     IR_fft_frames = complex(zeros(frame_size*n_frames, 1));
@@ -19,7 +20,7 @@ function [ir_frames_real, ir_frames_imag, n_frames, output_size] = GetUnisonPart
         IR_fft_frames(1+(frame-1)*frame_size:frame*frame_size,1) = IR_frame;
     end
     output_size = n_frames * frame_size;
-    ir_frames_real(1:output_size) = real(IR_fft_frames);
-    ir_frames_imag(1:output_size) = imag(IR_fft_frames);
+    ir_frames_real = real(IR_fft_frames);
+    ir_frames_imag = imag(IR_fft_frames);
     
 end

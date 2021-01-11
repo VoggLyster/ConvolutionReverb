@@ -1,0 +1,38 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2019
+
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Convolution Reverb - Standalone Plugin", "Convolution Reverb_StandalonePlugin.vcxproj", "{DB9868E3-7C99-0981-D22A-B48F3AE061B9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D75553D3-42A1-F4FA-0074-E924CD06D818} = {D75553D3-42A1-F4FA-0074-E924CD06D818}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Convolution Reverb - VST3", "Convolution Reverb_VST3.vcxproj", "{D69FD39A-16A8-381A-20C7-4F9DFBF8051B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D75553D3-42A1-F4FA-0074-E924CD06D818} = {D75553D3-42A1-F4FA-0074-E924CD06D818}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Convolution Reverb - Shared Code", "Convolution Reverb_SharedCode.vcxproj", "{D75553D3-42A1-F4FA-0074-E924CD06D818}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D69FD39A-16A8-381A-20C7-4F9DFBF8051B}.Debug|x64.ActiveCfg = Debug|x64
+		{D69FD39A-16A8-381A-20C7-4F9DFBF8051B}.Debug|x64.Build.0 = Debug|x64
+		{D69FD39A-16A8-381A-20C7-4F9DFBF8051B}.Release|x64.ActiveCfg = Release|x64
+		{D69FD39A-16A8-381A-20C7-4F9DFBF8051B}.Release|x64.Build.0 = Release|x64
+		{DB9868E3-7C99-0981-D22A-B48F3AE061B9}.Debug|x64.ActiveCfg = Debug|x64
+		{DB9868E3-7C99-0981-D22A-B48F3AE061B9}.Debug|x64.Build.0 = Debug|x64
+		{DB9868E3-7C99-0981-D22A-B48F3AE061B9}.Release|x64.ActiveCfg = Release|x64
+		{DB9868E3-7C99-0981-D22A-B48F3AE061B9}.Release|x64.Build.0 = Release|x64
+		{D75553D3-42A1-F4FA-0074-E924CD06D818}.Debug|x64.ActiveCfg = Debug|x64
+		{D75553D3-42A1-F4FA-0074-E924CD06D818}.Debug|x64.Build.0 = Debug|x64
+		{D75553D3-42A1-F4FA-0074-E924CD06D818}.Release|x64.ActiveCfg = Release|x64
+		{D75553D3-42A1-F4FA-0074-E924CD06D818}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

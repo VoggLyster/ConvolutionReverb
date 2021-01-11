@@ -1,11 +1,10 @@
 %% Removes trailing values below threshold
-function output_size = RemoveTailBelowThreshold(IR, input_size, threshold_dB)
-    output_size = input_size;
+function IR = RemoveTailBelowThreshold(IR, threshold_dB)
     threshold = threshold_dB;
     threshold_mag = db2mag(threshold);
-    for i = input_size:-1:1
-       if abs(IR(i)) > threshold_mag
-          output_size = i;
+    for i = size(IR,1):-1:1
+       if abs(mean(IR(i,1,:))) > threshold_mag
+          IR = IR(1:i,:);
           break 
        end
     end
